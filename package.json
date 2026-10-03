@@ -1,0 +1,23 @@
+{
+  "name": "rogue-text",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Zork-style text adventure with a Groq-powered AI Dungeon Master. Hizaki Labs.",
+  "keywords": ["text-adventure", "zork", "interactive-fiction", "groq", "llm", "game"],
+  "license": "MIT",
+  "author": "John Hizaki (Hizaki Labs)",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node dev-server.js",
+    "dev": "node dev-server.js",
+    "play": "node dev-server.js",
+    "doctor": "node doctor.js",
+    "diagnose": "node doctor.js",
+    "check": "node doctor.js --quiet",
+    "test": "node doctor.js",
+    "test:full": "node tests/run-all.js",
+    "mock": "node tests/mock-groq.js"
+  },
+  "devDependencies": { "jsdom": "^29.1.1" },
+  "note": "JSON has NO comments. Never add // or /* */ here. The game needs no build step."
+}

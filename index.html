@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ====================================================================
+         ROGUE-TEXT — index.html
+         A Groq-powered Zork-style text adventure
+         Hizaki Labs
+         ==================================================================== -->
+
+    <!-- Meta Tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Rogue-Text — a Zork-style text adventure where an AI Dungeon Master generates every room, creature and piece of loot on the fly. Powered by Groq. Built by Hizaki Labs.">
+    <meta name="keywords" content="Rogue-Text, text adventure, Zork, interactive fiction, AI game, Groq, dungeon crawler, Hizaki Labs">
+    <meta name="author" content="John Hizaki">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="msapplication-TileColor" content="#0f172a">
+
+    <!-- Open Graph / social preview -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rogue-Text — A Groq-Powered Text Adventure">
+    <meta property="og:description" content="Type a command. The Dungeon Master invents the rest. Every room, every monster, every rusted blade is generated live by Groq.">
+    <meta property="og:image" content="images/hero-dungeon.png">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <title>Rogue-Text — A Groq-Powered Text Adventure | Hizaki Labs</title>
+
+    <!-- ================= GOOGLE FONTS: Inter + Space Grotesk ================= -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- ================= FAVICONS & TOUCH ICONS =================
+         Drop your files into the root  images/  folder:
+             images/icon.png       32x32  (also used at 180x180 for iOS)
+             images/icon.svg       scalable
+             images/hero-dungeon.png  optional wide banner (1920x600)
+         Every reference below degrades gracefully if a file is missing.
+    -->
+    <link rel="icon" type="image/svg+xml" href="images/icon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/icon.png">
+    <link rel="mask-icon" href="images/icon.svg" color="#6366f1">
+
+    <!--
+        OPTIONAL — Tailwind CSS (not required).
+        Rogue-Text ships hand-rolled CSS that already implements the Hizaki Labs
+        design system, so there is no build step and no CDN dependency. If you
+        would rather drive new UI with Tailwind utilities, uncomment the block
+        below; it is configured with the same brand tokens as style.css.
+
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            'inter': ['Inter', 'sans-serif'],
+                            'space-grotesk': ['Space Grotesk', 'sans-serif']
+                        },
+                        colors: {
+                            primary: '#6366f1',
+                            'primary-dark': '#4f46e5',
+                            secondary: '#e5e7eb',
+                            accent: '#10b981'
+                        }
+                    }
+                }
+            };
+        </script>
+    -->
+
+    <!-- ================= MAIN CSS ================= -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- ================= GAME LOGIC ================= -->
+    <script src="app.js" defer></script>
+</head>
+
+<body>
+    <!-- Damage flash overlay (aria-hidden: purely decorative) -->
+    <div class="damage-flash" id="damage-flash" aria-hidden="true"></div>
+
+    <a href="#terminal" class="skip-link">Skip to the dungeon</a>
+
+    <!-- ==========================================================
+         HEADER
+         ========================================================== -->
+    <header class="site-header">
+        <div class="wrap site-header__inner">
+            <a href="#top" class="brand" aria-label="Rogue-Text home">
+                <span class="brand__mark">
+                    <!-- Inline SVG shows instantly, then the real icon sits on top of it -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M14.5 2.5 21.5 9.5 9 22H2v-7z"></path>
+                        <path d="M4 20 16.5 7.5"></path>
+                        <path d="M12 13l-1 1"></path>
+                    </svg>
+                    <img src="images/icon.png" alt="" width="36" height="36" loading="eager"
+                         onerror="this.style.display='none';">
+                </span>
+                <span class="brand__text">
+                    <span class="brand__name">Rogue-Text</span>
+                    <span class="brand__sub">Hizaki Labs</span>
+                </span>
+            </a>
+
+            <div class="header-actions">
+                <!-- Live / Lite Dungeon Master indicator -->
+                <span class="badge badge--live" id="mode-badge" title="Connection to the Groq Dungeon Master">
+                    <span class="badge__dot" aria-hidden="true"></span>
+                    <span id="mode-label">LIVE DM</span>
+                </span>
+
+                <button type="button" class="btn btn--ghost" id="help-button" aria-haspopup="dialog">
+                    <span aria-hidden="true">?</span> Help
+                </button>
+                <button type="button" class="btn btn--primary" id="new-game-button">
+                    New Dungeon
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==========================================================
+         HERO — indigo → purple brand gradient
+         ========================================================== -->
+    <section class="hero" id="top">
+        <div class="wrap hero__inner">
+            <p class="hero__eyebrow">A Groq-powered text adventure</p>
+            <h1 class="hero__title">ROGUE&#8209;TEXT</h1>
+            <p class="hero__blurb">
+                There is no map. No script. No two dungeons alike. Every chamber, every creature and
+                every rusted blade is invented the moment you type — by a large language model
+                acting as your Dungeon Master.
+            </p>
+            <ul class="hero__facts">
+                <li><strong id="fact-rooms">Unlimited</strong><span>procedural rooms</span></li>
+                <li><strong>Live</strong><span>enemy combat</span></li>
+                <li><strong>Persistent</strong><span>inventory &amp; loot</span></li>
+                <li><strong>Lethal</strong><span>death is permanent</span></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ==========================================================
+         MAIN — terminal + sidebar
+         ========================================================== -->
+    <main class="wrap layout" id="main">
+
+        <!-- ---------------------- TERMINAL ---------------------- -->
+        <section class="terminal panel" id="terminal" aria-labelledby="terminal-heading">
+            <div class="panel__head">
+                <h2 class="panel__title" id="terminal-heading">
+                    The Chronicle
+                </h2>
+                <p class="panel__meta">
+                    <span class="kbd">Enter</span> to act &middot;
+                    <span class="kbd">&#8593;</span><span class="kbd">&#8595;</span> for command history &middot;
+                    click the text to skip the typing
+                </p>
+            </div>
+
+            <!-- Narrative log -->
+            <div class="log" id="log" role="log" aria-live="polite" aria-label="Adventure log" tabindex="0">
+                <noscript>
+                    <p class="log__entry log__entry--system">
+                        Rogue-Text needs JavaScript enabled to speak with the Dungeon Master.
+                    </p>
+                </noscript>
+            </div>
+
+            <!-- Quick action chips -->
+            <div class="chips" id="quick-chips" aria-label="Quick commands">
+                <button type="button" class="chip" data-command="look">look</button>
+                <button type="button" class="chip" data-command="inventory">inventory</button>
+                <button type="button" class="chip" data-command="attack">attack</button>
+                <button type="button" class="chip" data-command="take all">take all</button>
+                <button type="button" class="chip" data-command="rest">rest</button>
+                <button type="button" class="chip" data-command="search the room">search</button>
+            </div>
+
+            <!-- Command bar -->
+            <form class="command-bar" id="command-form" autocomplete="off" novalidate>
+                <label for="command-input" class="visually-hidden">Enter a command</label>
+                <span class="command-bar__prompt" aria-hidden="true">&gt;</span>
+                <input
+                    type="text"
+                    id="command-input"
+                    name="command"
+                    class="command-bar__input"
+                    placeholder="go north, take the lantern, attack the grave-wight…"
+                    maxlength="500"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                    enterkeyhint="send">
+                <button type="submit" class="btn btn--primary command-bar__send" id="send-button">
+                    Send
+                </button>
+            </form>
+
+            <!-- Live region for transport / system notices -->
+            <p class="terminal__status" id="terminal-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <!-- ---------------------- SIDEBAR ---------------------- -->
+        <aside class="sidebar" aria-label="Adventurer status">
+
+            <!-- Vitals -->
+            <section class="panel">
+                <h2 class="panel__title">Vitals</h2>
+                <div class="stat stat--hp">
+                    <div class="stat__row">
+                        <span class="stat__label">Health</span>
+                        <span class="stat__value"><span id="hp-current">20</span> / <span id="hp-max">20</span></span>
+                    </div>
+                    <div class="hp-bar" role="progressbar" aria-labelledby="hp-label"
+                         aria-valuemin="0" aria-valuemax="20" aria-valuenow="20" id="hp-bar">
+                        <span class="visually-hidden" id="hp-label">Health</span>
+                        <div class="hp-bar__fill" id="hp-fill"></div>
+                    </div>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <span class="stat-box__label">Score</span>
+                        <span class="stat-box__value" id="score-value">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-box__label">Turns</span>
+                        <span class="stat-box__value" id="turns-value">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-box__label">Status</span>
+                        <span class="stat-box__value stat-box__value--small" id="status-value">Alive</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Location -->
+            <section class="panel">
+                <h2 class="panel__title">Location</h2>
+                <p class="location__name" id="location-name">The Threshold</p>
+                <p class="panel__hint">Known exits — click to travel:</p>
+                <div class="chips chips--exits" id="exits-list" aria-label="Exits"></div>
+                <p class="panel__hint panel__hint--muted" id="exits-empty">No exits discovered yet.</p>
+            </section>
+
+            <!-- Threat -->
+            <section class="panel panel--threat" id="threat-panel" hidden>
+                <h2 class="panel__title panel__title--danger">Threat</h2>
+                <p class="threat__name" id="threat-name">—</p>
+                <p class="threat__desc" id="threat-desc"></p>
+                <div class="stat__row">
+                    <span class="stat__label">Enemy health</span>
+                    <span class="stat__value"><span id="enemy-hp">0</span> / <span id="enemy-hp-max">0</span></span>
+                </div>
+                <div class="hp-bar hp-bar--enemy" role="progressbar" aria-label="Enemy health"
+                     aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="enemy-hp-bar">
+                    <div class="hp-bar__fill" id="enemy-hp-fill"></div>
+                </div>
+                <p class="threat__hint">Type <strong>attack</strong> to engage.</p>
+            </section>
+
+            <!-- Inventory -->
+            <section class="panel">
+                <h2 class="panel__title">
+                    Inventory
+                    <span class="count" id="inventory-count">0</span>
+                </h2>
+                <ul class="inventory" id="inventory-list"></ul>
+                <p class="panel__hint panel__hint--muted" id="inventory-empty">
+                    Your hands are empty. Anything you find, you can carry.
+                </p>
+            </section>
+
+            <!-- Session -->
+            <section class="panel panel--session">
+                <h2 class="panel__title">Session</h2>
+                <dl class="meta-list">
+                    <div class="meta-list__row">
+                        <dt>Dungeon Master</dt>
+                        <dd><span id="model-label">openai/gpt-oss-120b</span></dd>
+                    </div>
+                    <div class="meta-list__row">
+                        <dt>Engine</dt>
+                        <dd>Groq LPU &middot; Chat Completions</dd>
+                    </div>
+                    <div class="meta-list__row">
+                        <dt>Rooms explored</dt>
+                        <dd id="visited-count">0</dd>
+                    </div>
+                </dl>
+                <p class="panel__hint panel__hint--muted">
+                    Your run autosaves to this browser. Reload and it continues where you left off.
+                </p>
+            </section>
+        </aside>
+    </main>
+
+    <!-- ==========================================================
+         FOOTER
+         ========================================================== -->
+    <footer class="site-footer">
+        <div class="wrap site-footer__inner">
+            <p class="site-footer__brand">Rogue-Text &middot; Hizaki Labs</p>
+            <p class="site-footer__note">
+                Dungeon Master: <span id="footer-model">openai/gpt-oss-120b</span> via Groq.
+                Inspired by <em>Zork</em> (Infocom, 1980) — an independent homage.
+            </p>
+        </div>
+    </footer>
+
+    <!-- ==========================================================
+         HELP MODAL
+         ========================================================== -->
+    <div class="modal" id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+        <div class="modal__backdrop" data-close-modal></div>
+        <div class="modal__card panel">
+            <div class="modal__head">
+                <h2 class="panel__title" id="help-title">How to Play</h2>
+                <button type="button" class="icon-button" id="help-close" aria-label="Close help" data-close-modal>&times;</button>
+            </div>
+            <div class="modal__body">
+                <p>
+                    You are an adventurer at the mouth of an unmapped dungeon. There is no correct
+                    path and no walkthrough — describe what you want to do in plain English and the
+                    Dungeon Master decides what happens.
+                </p>
+
+                <h3 class="modal__subtitle">Commands that always work</h3>
+                <ul class="modal__list">
+                    <li><code>look</code> — survey the room again</li>
+                    <li><code>go north</code> — or <code>south</code>, <code>east</code>, <code>west</code>, <code>up</code>, <code>down</code></li>
+                    <li><code>take the rusted lantern</code> — or <code>take all</code></li>
+                    <li><code>attack</code> — strike whatever is trying to eat you</li>
+                    <li><code>inventory</code> — list what you carry</li>
+                    <li><code>rest</code> — recover health, if the room is safe</li>
+                    <li><code>search the altar</code> — dig for secrets and hidden loot</li>
+                </ul>
+
+                <h3 class="modal__subtitle">You can also just… say things</h3>
+                <p class="modal__aside">
+                    <code>read the inscription on the arch</code> &middot;
+                    <code>throw the torch into the pit</code> &middot;
+                    <code>bar the door and listen</code> &middot;
+                    <code>threaten the goblin with my sword</code>
+                </p>
+
+                <h3 class="modal__subtitle">Survival rules</h3>
+                <ul class="modal__list">
+                    <li>You have <strong>20 health</strong>. Damage is real and permanent for this run.</li>
+                    <li>Loot the DM mentions is <strong>added to your inventory automatically</strong> — check the sidebar.</li>
+                    <li>Enemies act on their own turn. Attacking something stronger than you is a choice you are allowed to make.</li>
+                    <li>Score climbs with kills, treasures and discoveries.</li>
+                    <li>At <strong>0 health you die</strong>, and the run is over. <em>New Dungeon</em> starts fresh.</li>
+                </ul>
+
+                <h3 class="modal__subtitle">If the Dungeon Master goes quiet</h3>
+                <p class="modal__aside">
+                    The badge in the header reads <strong>LIVE DM</strong> while Groq is answering. If the
+                    network or your API key fails, it flips to <strong>LITE DM</strong> and the game keeps
+                    playing with a local fallback narrator, so you are never stuck. Reload once the
+                    connection is restored.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div class="toasts" id="toasts" role="status" aria-live="polite" aria-atomic="false"></div>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a44ccdb1ae60553a',t:'MTc5MTAzOTQ5MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

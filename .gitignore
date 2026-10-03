@@ -1,0 +1,101 @@
+# ============================================================================
+# Rogue-Text — .gitignore
+# Hizaki Labs
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# SECRETS & ENVIRONMENT VARIABLES  (NEVER COMMIT THESE)
+# ---------------------------------------------------------------------------
+# The Groq API key lives here locally. On Vercel it lives in Project Settings.
+#
+# .env* covers every variant in one rule: .env, .env.local, .env.local.bak
+# (created by the cleanup command), .env.production, .env.development.local, …
+# .env.example is the ONLY env file that belongs in the repo, so it is
+# re-included by the negation below — keep that line after the .env* line.
+.env
+.env*
+!.env.example
+*.pem
+*.key
+
+# Vercel CLI project metadata (contains your project/org IDs)
+.vercel
+
+# ---------------------------------------------------------------------------
+# DEPENDENCIES
+# ---------------------------------------------------------------------------
+node_modules/
+.pnp
+.pnp.js
+jspm_packages/
+bower_components/
+
+# ---------------------------------------------------------------------------
+# BUILD OUTPUT & CACHES
+# ---------------------------------------------------------------------------
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.vercel_build_output/
+.parcel-cache/
+.turbo/
+.cache/
+.eslintcache
+coverage/
+
+# ---------------------------------------------------------------------------
+# LOGS
+# ---------------------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.firebase-debug.log*
+
+# ---------------------------------------------------------------------------
+# EDITORS & OS FILES
+# ---------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# VS Code: keep shared settings, ignore personal state
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+*.code-workspace
+
+# JetBrains
+.idea/
+*.iml
+
+# Vim / Emacs
+*.swp
+*.swo
+*~
+\#*\#
+.\#*
+
+# ---------------------------------------------------------------------------
+# LOCAL SCRATCH PADS (personal DM testing notes, prompt experiments)
+# ---------------------------------------------------------------------------
+scratch/
+notes.local.md
+saves/
+
+# ---------------------------------------------------------------------------
+# OPTIONAL: keep empty folders in the repo
+# ---------------------------------------------------------------------------
+!images/.gitkeep
